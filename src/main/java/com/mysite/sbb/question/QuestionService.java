@@ -2,6 +2,7 @@ package com.mysite.sbb.question;
 
 import com.mysite.sbb.DataNotFoundException;
 import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.answer.AnswerRepository;
 import com.mysite.sbb.user.SiteUser;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.Optional;
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
 
     private Specification<Question> search(String kw) {
         return new Specification<>() {
@@ -41,13 +43,6 @@ public class QuestionService {
         };
     }
 
-    public Page<Question> getList(int page, String kw) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("createDate"));
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
-        Specification<Question> spec = search(kw);
-        return this.questionRepository.findAll(spec, pageable);
-    }
 
     public Question getQuestion(Integer id){
         Optional<Question> question = this.questionRepository.findById(id);
@@ -67,13 +62,6 @@ public class QuestionService {
         this.questionRepository.save(q);
     }
 
-    public Page<Question> getList(int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("createDate"));
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
-        return this.questionRepository.findAll(pageable);
-    }
-
     public void modify(Question question, String subject, String content) {
         question.setSubject(subject);
         question.setContent(content);
@@ -88,5 +76,20 @@ public class QuestionService {
     public void vote(Question question, SiteUser siteUser) {
         question.getVoter().add(siteUser);
         this.questionRepository.save(question);
+    }
+
+//    public Page<Question> getList(int page) {
+//        List<Sort.Order> sorts = new ArrayList<>();
+//        sorts.add(Sort.Order.desc("createDate"));
+//        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
+//        return this.questionRepository.findAll(pageable);
+//    }
+
+    public Page<Question> getList(int page, String kw) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
+        Specification<Question> spec = search(kw);
+        return this.questionRepository.findAll(spec, pageable);
     }
 }
